@@ -31,9 +31,9 @@ assert (
     shape_type == "pointcloud"
 ), "set shape_type = 'pointcloud'  in global_variable.py"
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-server_path = "./"  # "/playpen-raid1/"#"/home/zyshen/remote/llr11_mount/"
-source_path = server_path + "data/toy_demo_data/divide_3d_sphere_level1.vtk"
-target_path = server_path + "data/toy_demo_data/divide_3d_cube_level4.vtk"
+server_path = "/home/lynn/nerf_ws/SplaTAM/"  # "/playpen-raid1/"#"/home/zyshen/remote/llr11_mount/"
+source_path = server_path + "data/urdf/storage/end/end.obj"
+target_path = server_path + "data/urdf/storage/end/end.obj"
 
 
 ####################  prepare data ###########################

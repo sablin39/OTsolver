@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 from pykeops.torch import LazyTensor
 import torch.nn.functional as F
-import pointnet2.lib.pointnet2_utils as pointnet2_utils
+# import pointnet2.lib.pointnet2_utils as pointnet2_utils
 from robot.shape.point_interpolator import nadwat_kernel_interpolator
 from robot.utils.knn_utils import KNN, AnisoKNN
 

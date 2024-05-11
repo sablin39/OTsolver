@@ -14,16 +14,16 @@ SHAPE_POOL = {
 Shape = SHAPE_POOL[shape_type]
 
 
-from robot.metrics.reg_losses import *
+# from robot.metrics.reg_losses import *
 
-LOSS_POOL = {
-    "current": CurrentDistance,
-    "varifold": VarifoldDistance,
-    "geomloss": GeomDistance,
-    "l2": L2Distance,
-    "localreg": LocalReg,
-    "gmm": GMMLoss,
-}
+# LOSS_POOL = {
+#     "current": CurrentDistance,
+#     "varifold": VarifoldDistance,
+#     "geomloss": GeomDistance,
+#     "l2": L2Distance,
+#     "localreg": LocalReg,
+#     "gmm": GMMLoss,
+# }
 
 
 from robot.datasets.general_dataset import GeneralDataset

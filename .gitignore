@@ -32,3 +32,5 @@ robot/debug
 *.jpg
 *.obj
 /robot/experiments/datasets/modelnet40/model/
+**/build/
+*.egg-info

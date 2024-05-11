@@ -9,6 +9,7 @@ sys.path.insert(0, os.path.abspath(".."))
 sys.path.insert(0, os.path.abspath("../.."))
 import numpy as np
 import torch
+import open3d as o3d
 from robot.utils.module_parameters import ParameterDict
 from robot.datasets.data_utils import get_file_name, generate_pair_name, get_obj
 from robot.shape.shape_pair_utils import create_shape_pair
@@ -30,11 +31,25 @@ from robot.experiments.datasets.toy.visualizer import toy_plot
 assert (
     shape_type == "pointcloud"
 ), "set shape_type = 'pointcloud'  in global_variable.py"
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-server_path = "/home/lynn/nerf_ws/SplaTAM/"  # "/playpen-raid1/"#"/home/zyshen/remote/llr11_mount/"
-source_path = server_path + "data/urdf/storage/end/end.obj"
-target_path = server_path + "data/urdf/storage/end/end.obj"
+device = torch.device("cuda:0")
 
+server_path = "../"  # "/playpen-raid1/"#"/home/zyshen/remote/llr11_mount/"
+print(server_path)
+source_path = server_path + "/data/urdf/storage/start/start.obj"
+target_path = server_path + "/data/urdf/storage/end/end.obj"
+from pytorch3d.io import IO
+import pytorch3d as p3d
+
+PTS=50000
+
+start = IO().load_mesh(source_path, device)
+end= IO().load_mesh(target_path, device)
+
+source_points=p3d.ops.sample_points_from_meshes(start, PTS)
+target_points=p3d.ops.sample_points_from_meshes(end, PTS)
+# totensor = lambda x: torch.tensor(np.asarray(x.points).astype(np.float32))
+# source_points = totensor(o3d.io.read_point_cloud(source_path)).unsqueeze(0).to(device)
+# target_points = totensor(o3d.io.read_point_cloud(target_path)).unsqueeze(0).to(device)
 
 ####################  prepare data ###########################
 pair_name = generate_pair_name([source_path, target_path])
@@ -45,11 +60,10 @@ get_obj_func = get_obj(reader_obj, normalizer_obj, sampler_obj, device)
 source_obj, source_interval = get_obj_func(source_path)
 target_obj, target_interval = get_obj_func(target_path)
 min_interval = min(source_interval, target_interval)
-input_data = {"source": source_obj, "target": target_obj}
-create_shape_pair_from_data_dict = obj_factory(
-    "shape_pair_utils.create_source_and_target_shape()"
-)
-source, target = create_shape_pair_from_data_dict(input_data)
+
+source = Shape().set_data(points=source_points, pointfea=None)
+target = Shape().set_data(points=target_points, pointfea=None)
+
 camera_pos = [
     (-5.5034147913360005, 5.520778675107747, 10.458100554989956),
     (0.0, 0.0, 0.0),
@@ -62,7 +76,7 @@ shape_pair.pair_name = "toy"
 """ Experiment 1:  Robust optimal transport """
 task_name = "gradient_flow"
 solver_opt = ParameterDict()
-record_path = server_path + "output/toy_reg/{}".format(task_name)
+record_path = server_path + "experiments/toy_reg/{}".format(task_name)
 os.makedirs(record_path, exist_ok=True)
 solver_opt["record_path"] = record_path
 model_name = "gradient_flow_opt"
@@ -168,7 +182,7 @@ visualize_multi_point(
 # native LDDMM is slow and likely to experience numerically underflow, see expri 4 for an potential improvement
 task_name = "lddmm"
 solver_opt = ParameterDict()
-record_path = server_path + "output/toy_reg/{}".format(task_name)
+record_path = server_path + "experiments/toy_reg/{}".format(task_name)
 os.makedirs(record_path, exist_ok=True)
 solver_opt["record_path"] = record_path
 solver_opt["point_grid_scales"] = [-1]
@@ -223,7 +237,7 @@ visualize_multi_point(
 """ Experiment 4:  Robust optimal transport projection (LDDMM) """
 task_name = "gradient_flow_guided_by_lddmm"
 solver_opt = ParameterDict()
-record_path = server_path + "output/toy_reg/{}".format(task_name)
+record_path = server_path + "experiments/toy_reg/{}".format(task_name)
 os.makedirs(record_path, exist_ok=True)
 solver_opt["record_path"] = record_path
 solver_opt["point_grid_scales"] = [-1]
@@ -319,7 +333,7 @@ task_name = "discrete_flow"
 gradient_flow_mode = False  # only work when loss_type="wasserstein_dist
 loss_type = "gmm"  # "gmm" or "wasserstein_dist"
 solver_opt = ParameterDict()
-record_path = server_path + "output/toy_reg/{}".format(task_name)
+record_path = server_path + "experiments/toy_reg/{}".format(task_name)
 solver_opt["record_path"] = record_path
 solver_opt["save_2d_capture_every_n_iter"] = -1
 solver_opt["point_grid_scales"] = [-1]

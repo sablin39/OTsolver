@@ -29,7 +29,7 @@ def save_shape_into_file(folder_path, alias, pair_name, ftype="vtk", **args):
             data = pv.PolyData(points[b])
         for key, item in args.items():
             if key not in ["points", "faces"]:
-                data.point_arrays[key] = item[b]
+                data.point_data[key] = item[b]
         fpath = os.path.join(
             folder_path, pair_name[b] + "_" + alias + ".{}".format(ftype)
         )

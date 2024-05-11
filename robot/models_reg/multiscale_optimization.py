@@ -6,7 +6,7 @@ from robot.global_variable import SHAPE_SAMPLER_POOL
 from robot.shape.shape_pair_utils import create_shape_pair
 from robot.utils.shape_visual_utils import save_shape_pair_into_files
 from robot.utils.obj_factory import obj_factory
-
+from tqdm import tqdm
 
 def build_multi_scale_solver(opt, model):
     """
@@ -185,7 +185,7 @@ def build_single_scale_general_solver(
     def solve(shape_pair):
         model.init_reg_param(shape_pair)
         ######################################3
-        shape_pair.reg_param.register_hook(grad_hook)
+        shape_pair.reg_param.register_hook(silent_grad_hook)
         ############################################3
         optimizer = optimizer_builder(opt_optim)([shape_pair.reg_param])
         lr_scheduler = scheduler_builder(opt_scheduler)(optimizer)
@@ -199,12 +199,13 @@ def build_single_scale_general_solver(
             cur_energy = model(shape_pair)
             cur_energy.backward()
             return cur_energy
-
-        for iter in range(num_iter):
+        pbar=tqdm(range(num_iter))
+        for iter in pbar:
             cur_energy = optimizer.step(closure)
             lr_scheduler.step(iter)
             cur_energy = cur_energy.item()
             rel_f = abs(last_energy - cur_energy) / (abs(cur_energy))
+            pbar.set_description(f"Current grad: {rel_f}")
             last_energy = cur_energy
             if (
                 save_res
@@ -238,6 +239,7 @@ def build_single_scale_general_solver(
                 if patient_count > patient:
                     print("Reached relative function tolerance of = " + str(rel_ftol))
                     break
+        pbar.close()
         if save_res:
             save_shape_pair_into_files(
                 record_path, "iter_last", shape_pair.get_pair_name(), shape_pair
@@ -297,10 +299,12 @@ def build_single_scale_model_embedded_solver(
         last_energy = 0.0
         patient_count = 0
         previous_converged_iter = 0.0
-        for iter in range(num_iter):
+        pbar=tqdm(range(num_iter))
+        for iter in pbar:
             cur_energy = model(shape_pair)
             cur_energy = cur_energy.item()
             rel_f = abs(last_energy - cur_energy) / (abs(cur_energy))
+            pbar.set_description(f"Current grad: {rel_f}")
             last_energy = cur_energy
             if (
                 save_res
@@ -333,6 +337,7 @@ def build_single_scale_model_embedded_solver(
                 if patient_count > patient:
                     print("Reached relative function tolerance of = " + str(rel_ftol))
                     break
+        pbar.close()
         if save_res:
             save_shape_pair_into_files(
                 record_path, "iter_last", shape_pair.get_pair_name(), shape_pair
@@ -352,5 +357,11 @@ def grad_hook(grad):
     print("debugging info, the grad_norm is {} ".format(grad.norm()))
     return grad
 
+
+def silent_grad_hook(grad):
+    # import pydevd
+    # pydevd.settrace(suspend=False, trace_only_current_thread=True)
+    # print("debugging info, the grad_norm is {} ".format(grad.norm()))
+    return grad
 
 ############################3

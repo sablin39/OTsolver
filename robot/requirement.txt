@@ -20,3 +20,4 @@ pyvista
 seaborn
 pygifsicle
 pypng
+tqdm

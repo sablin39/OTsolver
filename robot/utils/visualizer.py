@@ -431,7 +431,7 @@ def visualize_full(
             flow_ = np.zeros_like(flow)
             index = list(range(0, npoints, 30))
             flow_[index, :] = flow[index]
-            obj1.point_arrays["flow"] = flow_  # flow_
+            obj1.point_data["flow"] = flow_  # flow_
             geom = pv.Arrow(tip_radius=0.08, shaft_radius=0.035, scale=None)
             arrows = obj1.glyph(orient="flow", geom=geom)
             p.add_mesh(arrows, color="brown", opacity=0.3)

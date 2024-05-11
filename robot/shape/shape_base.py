@@ -77,7 +77,7 @@ class ShapeBase(object):
         :return:
         """
         points = args["points"]
-        assert len(points.shape) == 3
+        assert len(points.shape) == 3, f"Point cloud should not have the shape of {points.shape}"
         weights = args["weights"] if "weights" in args else None
         landmarks = args["landmarks"] if "landmarks" in args else None
         pointfea = args["pointfea"] if "pointfea" in args else None
